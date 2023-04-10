@@ -1,14 +1,19 @@
-import {
-  MouseEvent,
-  MouseEventHandler,
-  useEffect,
-  useRef,
-  useState,
-} from "react";
+import { MouseEvent, useEffect, useRef, useState } from "react";
 
 type Vector2 = {
   x: number;
   y: number;
+};
+
+type BrushStateProperty = {
+  showInViewer: boolean;
+  name: string;
+  value: number | string | boolean;
+};
+
+type BrushState = {
+  brushName: string;
+  state: BrushStateProperty[];
 };
 
 function App() {
@@ -21,11 +26,36 @@ function App() {
 
   const [currentLayer, setCurrentLayer] = useState("layer 1");
 
+  const [brush, setBrush] = useState("pixel");
+
+  const [brushState, setBrushState] = useState<BrushState[]>([
+    {
+      brushName: "pixel",
+      state: [
+        {
+          showInViewer: true,
+          name: "pixel perfect",
+          value: false,
+        },
+      ],
+    },
+  ]);
+
+  const currentBrushState = brushState.find(
+    ({ brushName }) => brushName === brush
+  );
+
   return (
     <div className="App flex w-full h-screen">
-      <div className="w-32 bg-slate-600"></div>
+      <div className="w-fit bg-slate-600 flex">
+        <Brushes brush={brush} setBrush={setBrush}></Brushes>
+      </div>
       <div className="grow bg-slate-900 flex flex-col">
-        <div className="w-full h-32 bg-slate-800"></div>
+        <div className="w-full h-fit bg-slate-800">
+          {currentBrushState && (
+            <PropertyViewer brushState={currentBrushState}></PropertyViewer>
+          )}
+        </div>
         <PixelCanvas
           pixelSize={pixelSize}
           zoom={zoom}
@@ -35,6 +65,66 @@ function App() {
       </div>
       <div className="w-32 bg-slate-600"></div>
     </div>
+  );
+}
+
+function PropertyViewer(props: { brushState: BrushState }) {
+  return (
+    <div className="p-2">
+      {props.brushState.state.map((brushProperty) => (
+        <BrushProperty brushProperty={brushProperty} key={brushProperty.name} />
+      ))}
+    </div>
+  );
+}
+
+function BrushProperty(props: { brushProperty: BrushStateProperty }) {
+  const { brushProperty } = props;
+  const { name, showInViewer, value } = brushProperty;
+
+  return (
+    <>
+      {typeof value == "boolean" && (
+        <div>
+          {name}
+          <input type="checkbox"></input>
+        </div>
+      )}
+    </>
+  );
+}
+
+function Brushes(props: {
+  brush: string;
+  setBrush: (newBrush: string) => void;
+}) {
+  const select = (name: string) => props.setBrush(name);
+  const selected = (name: string) => props.brush === name;
+
+  return (
+    <div className="p-4 flex flex-wrap grow w-full gap-2 justify-top flex-col align-center">
+      <Brush name="pixel" select={select} selected={selected}></Brush>
+      <Brush name="eraser" select={select} selected={selected}></Brush>
+      <Brush name="lasso" select={select} selected={selected}></Brush>
+      <Brush name="crop" select={select} selected={selected}></Brush>
+    </div>
+  );
+}
+
+function Brush(props: {
+  selected: (name: string) => boolean;
+  select: (name: string) => void;
+  name: string;
+}) {
+  return (
+    <button
+      onClick={() => props.select(props.name)}
+      className={`bg-slate-300 rounded-md flex justify-center items-center w-12 h-12 ${
+        props.selected(props.name) ? "border-4 border-slate-100" : ""
+      }`}
+    >
+      {props.name}
+    </button>
   );
 }
 
