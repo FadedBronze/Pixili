@@ -1,4 +1,5 @@
 import { MouseEvent, useEffect, useRef, useState } from "react";
+import React from "react";
 
 type Vector2 = {
   x: number;
@@ -8,7 +9,7 @@ type Vector2 = {
 type BrushStateProperty = {
   showInViewer: boolean;
   name: string;
-  value: number | string | boolean;
+  value: number | string[] | boolean;
 };
 
 type BrushState = {
@@ -37,6 +38,11 @@ function App() {
           name: "pixel perfect",
           value: false,
         },
+        {
+          showInViewer: true,
+          name: "scale",
+          value: 1,
+        },
       ],
     },
   ]);
@@ -53,7 +59,17 @@ function App() {
       <div className="grow bg-slate-900 flex flex-col">
         <div className="w-full h-fit bg-slate-800">
           {currentBrushState && (
-            <PropertyViewer brushState={currentBrushState}></PropertyViewer>
+            <PropertyViewer
+              brushState={currentBrushState}
+              setBrushState={(newState: BrushState) =>
+                setBrushState([
+                  ...brushState.filter(
+                    ({ brushName }) => brushName !== newState.brushName
+                  ),
+                  newState,
+                ])
+              }
+            ></PropertyViewer>
           )}
         </div>
         <PixelCanvas
@@ -68,29 +84,81 @@ function App() {
   );
 }
 
-function PropertyViewer(props: { brushState: BrushState }) {
+function PropertyViewer(props: {
+  brushState: BrushState;
+  setBrushState: (newState: BrushState) => void;
+}) {
   return (
-    <div className="p-2">
+    <div className="p-2 flex gap-2">
       {props.brushState.state.map((brushProperty) => (
-        <BrushProperty brushProperty={brushProperty} key={brushProperty.name} />
+        <BrushProperty
+          brushProperty={brushProperty}
+          key={brushProperty.name}
+          setBrushPropertyState={(newState: BrushStateProperty) => {
+            props.setBrushState({
+              brushName: props.brushState.brushName,
+              state: [
+                ...props.brushState.state.map((oldState) => {
+                  if (newState.name === oldState.name) {
+                    return newState;
+                  } else {
+                    return oldState;
+                  }
+                }),
+              ],
+            });
+          }}
+        />
       ))}
     </div>
   );
 }
 
-function BrushProperty(props: { brushProperty: BrushStateProperty }) {
-  const { brushProperty } = props;
+function BrushProperty(props: {
+  brushProperty: BrushStateProperty;
+  setBrushPropertyState: (newState: BrushStateProperty) => void;
+}) {
+  const { brushProperty, setBrushPropertyState } = props;
   const { name, showInViewer, value } = brushProperty;
 
-  return (
+  return showInViewer ? (
     <>
       {typeof value == "boolean" && (
-        <div>
-          {name}
-          <input type="checkbox"></input>
+        <div className="flex gap-2 text-slate-100 border-r pr-2">
+          <p>{name}</p>
+          <input
+            type="checkbox"
+            defaultChecked={value}
+            onChange={(e) => {
+              setBrushPropertyState({
+                name: brushProperty.name,
+                showInViewer: brushProperty.showInViewer,
+                value: e.currentTarget.checked,
+              });
+            }}
+          ></input>
+        </div>
+      )}
+      {typeof value == "number" && (
+        <div className="flex gap-2 text-slate-100 border-r pr-2 ">
+          <p>{name}</p>
+          <input
+            defaultValue={value}
+            type="number"
+            onChange={(e) => {
+              setBrushPropertyState({
+                name: brushProperty.name,
+                showInViewer: brushProperty.showInViewer,
+                value: JSON.parse(e.currentTarget.value),
+              });
+            }}
+            className="w-8 bg-slate-700"
+          ></input>
         </div>
       )}
     </>
+  ) : (
+    <></>
   );
 }
 
