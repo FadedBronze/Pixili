@@ -1,8 +1,8 @@
-import { MouseEvent, useEffect, useRef, useState } from "react";
-import React from "react";
+import { useState } from "react";
 import { BrushState, BrushStateProperty } from "./brushes/brush";
 import { pixel } from "./brushes/pixel";
 import PixelCanvas from "./Components/PixelCanvas";
+import { eraser } from "./brushes/eraser";
 
 export type Vector2 = {
   x: number;
@@ -23,6 +23,7 @@ function App() {
 
   const [brushStates, setBrushStates] = useState<BrushState[]>([
     pixel.defaultState,
+    eraser.defaultState,
   ]);
 
   const currentBrushState = brushStates.find(
