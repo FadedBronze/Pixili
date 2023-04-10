@@ -128,7 +128,12 @@ export default function PixelCanvas(props: {
           const ctx = canvasRef.current?.getContext("2d");
           if (ctx === null || ctx === undefined) return;
 
-          if (e.key == "z" && e.ctrlKey && !mouseDownRef.current) {
+          if (
+            e.key == "z" &&
+            e.ctrlKey &&
+            !mouseDownRef.current &&
+            layers.current.length > 0
+          ) {
             layers.current.splice(0, 1);
             layers.current[0].get("brush")!.data = initLayer({
               pixelSize: pixelCanvasDimensions.pixelSize,
