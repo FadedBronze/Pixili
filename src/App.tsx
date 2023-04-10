@@ -86,7 +86,7 @@ function PropertyViewer(props: {
       {props.currentBrushState.state.map((brushProperty) => (
         <BrushProperty
           brushProperty={brushProperty}
-          key={brushProperty.name}
+          key={props.currentBrushState.brushName + "-" + brushProperty.name}
           setBrushPropertyState={(newState: BrushStateProperty) => {
             props.setCurrentBrushState({
               brushName: props.currentBrushState.brushName,

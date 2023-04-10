@@ -139,7 +139,7 @@ export default function PixelCanvas(props: {
         }}
         onMouseUp={() => (mouseDownRef.current = false)}
         ref={canvasRef}
-        className="bg-white"
+        className="bg-black"
         width={pixelCanvasDimensions.pixelRatio * props.zoom}
         height={props.zoom}
       ></canvas>
@@ -205,8 +205,8 @@ const fillPixel = (params: {
   ctx.fillRect(
     position.x * pixelWidth,
     position.y * pixelWidth,
-    pixelWidth + 1,
-    pixelWidth + 1
+    pixelWidth,
+    pixelWidth
   );
 
   layer.data[position.x][position.y] = color;
