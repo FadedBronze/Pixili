@@ -32,7 +32,6 @@ export default function PixelCanvas(props: {
     pixelSize: props.pixelSize,
     pixelCount: props.pixelSize,
   };
-  const [rerenderPixels, setRerenderPixels] = useState(false);
 
   const layers = useRef<Map<string, Layer>[]>([
     new Map([
@@ -59,9 +58,8 @@ export default function PixelCanvas(props: {
     const canvas = canvasRef.current;
     const ctx = canvas?.getContext("2d");
     if (ctx === null || ctx === undefined) return;
-
     refreshALL(ctx);
-  }, [props.zoom, rerenderPixels]);
+  }, [props.zoom]);
 
   const refreshALL = (ctx: CanvasRenderingContext2D) => {
     for (let [_, layer] of layers.current[0]) {
@@ -132,13 +130,14 @@ export default function PixelCanvas(props: {
             e.key == "z" &&
             e.ctrlKey &&
             !mouseDownRef.current &&
-            layers.current.length > 0
+            layers.current.length > 1
           ) {
             layers.current.splice(0, 1);
             layers.current[0].get("brush")!.data = initLayer({
               pixelSize: pixelCanvasDimensions.pixelSize,
             });
-            setRerenderPixels(!rerenderPixels);
+
+            props.setZoom(props.zoom + 0.5);
           }
         }}
         tabIndex={0}
