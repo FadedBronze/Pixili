@@ -1,4 +1,4 @@
-import { MouseEvent, useEffect, useRef } from "react";
+import { MouseEvent, useEffect, useRef, useState } from "react";
 import { Vector2 } from "../App";
 import { BrushState } from "../brushes/brush";
 import { pixel } from "../brushes/pixel";
@@ -32,8 +32,9 @@ export default function PixelCanvas(props: {
     pixelSize: props.pixelSize,
     pixelCount: props.pixelSize,
   };
+  const [rerenderPixels, setRerenderPixels] = useState(false);
 
-  const layers = useRef<Map<string, Layer>>(
+  const layers = useRef<Map<string, Layer>[]>([
     new Map([
       [
         "layer 1",
@@ -51,23 +52,56 @@ export default function PixelCanvas(props: {
           }),
         },
       ],
-    ])
-  );
+    ]),
+  ]);
 
   useEffect(() => {
     const canvas = canvasRef.current;
-    if (canvas === null) return;
-    const ctx = canvas.getContext("2d");
-    if (ctx === null) return;
+    const ctx = canvas?.getContext("2d");
+    if (ctx === null || ctx === undefined) return;
 
-    for (let [_, layer] of layers.current) {
+    refreshALL(ctx);
+  }, [props.zoom, rerenderPixels]);
+
+  const refreshALL = (ctx: CanvasRenderingContext2D) => {
+    for (let [_, layer] of layers.current[0]) {
       refreshPixels({
         ctx,
         layer: layer,
         pixelCanvasDimensions: pixelCanvasDimensions,
       });
     }
-  }, [props.zoom]);
+  };
+
+  const draw = (e: MouseEvent) => {
+    const ctx = canvasRef.current?.getContext("2d");
+    if (ctx === null || ctx === undefined) return;
+
+    if (props.brushState === undefined) return;
+
+    const mousePos = getMousePos(e);
+    const pixelSize =
+      (props.zoom * pixelCanvasDimensions.pixelRatio) / props.pixelSize.x;
+    const mouseGridPos = {
+      x: Math.abs(Math.floor(mousePos.x / pixelSize)),
+      y: Math.abs(Math.floor(mousePos.y / pixelSize)),
+    };
+
+    const brush = brushes.find(
+      ({ name }) => name === props.brushState?.brushName
+    );
+
+    brush?.action({
+      ctx,
+      brushState: props.brushState,
+      layer: props.currentLayer,
+      layers: layers.current[0],
+      color: props.color,
+      mousePos: mouseGridPos,
+      pixelCanvasDimensions,
+      down: mouseDownRef.current,
+    });
+  };
 
   return (
     <div
@@ -78,65 +112,31 @@ export default function PixelCanvas(props: {
     >
       <canvas
         onMouseMove={(e: MouseEvent) => {
-          const ctx = canvasRef.current?.getContext("2d");
-          if (ctx === null || ctx === undefined) return;
-
-          if (props.brushState === undefined) return;
-
-          const mousePos = getMousePos(e);
-          const pixelSize =
-            (props.zoom * pixelCanvasDimensions.pixelRatio) / props.pixelSize.x;
-          const mouseGridPos = {
-            x: Math.abs(Math.floor(mousePos.x / pixelSize)),
-            y: Math.abs(Math.floor(mousePos.y / pixelSize)),
-          };
-
-          const brush = brushes.find(
-            ({ name }) => name === props.brushState?.brushName
-          );
-
-          brush?.action({
-            ctx,
-            brushState: props.brushState,
-            layer: props.currentLayer,
-            layers: layers.current,
-            color: props.color,
-            mousePos: mouseGridPos,
-            pixelCanvasDimensions,
-            down: mouseDownRef.current,
-          });
+          draw(e);
         }}
         onMouseDown={(e) => {
           mouseDownRef.current = true;
 
+          const present = new Map(
+            JSON.parse(JSON.stringify(Array.from(layers.current[0])))
+          ) as Map<string, Layer>;
+
+          layers.current.unshift(present);
+          draw(e);
+        }}
+        onKeyDown={(e) => {
           const ctx = canvasRef.current?.getContext("2d");
           if (ctx === null || ctx === undefined) return;
 
-          if (props.brushState === undefined) return;
-
-          const mousePos = getMousePos(e);
-          const pixelSize =
-            (props.zoom * pixelCanvasDimensions.pixelRatio) / props.pixelSize.x;
-          const mouseGridPos = {
-            x: Math.abs(Math.floor(mousePos.x / pixelSize)),
-            y: Math.abs(Math.floor(mousePos.y / pixelSize)),
-          };
-
-          const brush = brushes.find(
-            ({ name }) => name === props.brushState?.brushName
-          );
-
-          brush?.action({
-            ctx,
-            brushState: props.brushState,
-            layer: props.currentLayer,
-            layers: layers.current,
-            color: props.color,
-            mousePos: mouseGridPos,
-            pixelCanvasDimensions,
-            down: mouseDownRef.current,
-          });
+          if (e.key == "z" && e.ctrlKey && !mouseDownRef.current) {
+            layers.current.splice(0, 1);
+            layers.current[0].get("brush")!.data = initLayer({
+              pixelSize: pixelCanvasDimensions.pixelSize,
+            });
+            setRerenderPixels(!rerenderPixels);
+          }
         }}
+        tabIndex={0}
         onMouseUp={() => (mouseDownRef.current = false)}
         ref={canvasRef}
         className="bg-black"
@@ -146,6 +146,8 @@ export default function PixelCanvas(props: {
     </div>
   );
 }
+
+//canvas methods
 
 const getMousePos = (e: MouseEvent) => {
   const rect = (e.target as HTMLCanvasElement).getBoundingClientRect();
@@ -265,6 +267,7 @@ const clear = (params: {
     params.pixelCanvasDimensions.zoom * params.pixelCanvasDimensions.pixelRatio,
     params.pixelCanvasDimensions.zoom
   );
+
   const foundLayer = params.layers.get(layerName);
 
   if (foundLayer !== undefined) {
