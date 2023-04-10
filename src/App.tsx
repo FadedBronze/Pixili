@@ -1,20 +1,12 @@
 import { MouseEvent, useEffect, useRef, useState } from "react";
 import React from "react";
+import { BrushState, BrushStateProperty } from "./brushes/brush";
+import { pixel } from "./brushes/pixel";
+import PixelCanvas from "./Components/PixelCanvas";
 
-type Vector2 = {
+export type Vector2 = {
   x: number;
   y: number;
-};
-
-type BrushStateProperty = {
-  showInViewer: boolean;
-  name: string;
-  value: number | string[] | boolean;
-};
-
-type BrushState = {
-  brushName: string;
-  state: BrushStateProperty[];
 };
 
 function App() {
@@ -29,25 +21,11 @@ function App() {
 
   const [brush, setBrush] = useState("pixel");
 
-  const [brushState, setBrushState] = useState<BrushState[]>([
-    {
-      brushName: "pixel",
-      state: [
-        {
-          showInViewer: true,
-          name: "pixel perfect",
-          value: false,
-        },
-        {
-          showInViewer: true,
-          name: "scale",
-          value: 1,
-        },
-      ],
-    },
+  const [brushStates, setBrushStates] = useState<BrushState[]>([
+    pixel.defaultBrushState,
   ]);
 
-  const currentBrushState = brushState.find(
+  const currentBrushState = brushStates.find(
     ({ brushName }) => brushName === brush
   );
 
@@ -60,10 +38,10 @@ function App() {
         <div className="w-full h-fit bg-slate-800">
           {currentBrushState && (
             <PropertyViewer
-              brushState={currentBrushState}
-              setBrushState={(newState: BrushState) =>
-                setBrushState([
-                  ...brushState.filter(
+              currentBrushState={currentBrushState}
+              setCurrentBrushState={(newState: BrushState) =>
+                setBrushStates([
+                  ...brushStates.filter(
                     ({ brushName }) => brushName !== newState.brushName
                   ),
                   newState,
@@ -77,6 +55,7 @@ function App() {
           zoom={zoom}
           setZoom={setZoom}
           currentLayer={currentLayer}
+          brushState={brushStates.find(({ brushName }) => brushName === brush)}
         />
       </div>
       <div className="w-32 bg-slate-600"></div>
@@ -85,20 +64,20 @@ function App() {
 }
 
 function PropertyViewer(props: {
-  brushState: BrushState;
-  setBrushState: (newState: BrushState) => void;
+  currentBrushState: BrushState;
+  setCurrentBrushState: (newState: BrushState) => void;
 }) {
   return (
     <div className="p-2 flex gap-2">
-      {props.brushState.state.map((brushProperty) => (
+      {props.currentBrushState.state.map((brushProperty) => (
         <BrushProperty
           brushProperty={brushProperty}
           key={brushProperty.name}
           setBrushPropertyState={(newState: BrushStateProperty) => {
-            props.setBrushState({
-              brushName: props.brushState.brushName,
+            props.setCurrentBrushState({
+              brushName: props.currentBrushState.brushName,
               state: [
-                ...props.brushState.state.map((oldState) => {
+                ...props.currentBrushState.state.map((oldState) => {
                   if (newState.name === oldState.name) {
                     return newState;
                   } else {
@@ -193,160 +172,6 @@ function Brush(props: {
     >
       {props.name}
     </button>
-  );
-}
-
-type Layer = {
-  data: string[][];
-};
-
-function PixelCanvas(props: {
-  pixelSize: Vector2;
-  zoom: number;
-  setZoom: (scroll: number) => void;
-  currentLayer: string;
-}) {
-  const canvasRef = useRef<HTMLCanvasElement>(null);
-  const pixelRatio = props.pixelSize.x / props.pixelSize.y;
-
-  const initLayer = () => {
-    const layer: string[][] = [];
-
-    for (let x = 0; x < props.pixelSize.x; x++) {
-      layer[x] = [];
-
-      for (let y = 0; y < props.pixelSize.y; y++) {
-        layer[x][y] = "rgba(0, 0, 0, 0)";
-      }
-    }
-
-    return layer;
-  };
-
-  const layers = useRef<Map<string, Layer>>(
-    new Map([
-      ["layer 1", { data: initLayer() }],
-      ["brush", { data: initLayer() }],
-    ])
-  );
-
-  const fillPixel = (params: {
-    layer: Layer;
-    position: Vector2;
-    color: string;
-    ctx: CanvasRenderingContext2D;
-  }) => {
-    const { color, layer, position, ctx } = params;
-    const pixelWidth = (props.zoom * pixelRatio) / props.pixelSize.x;
-    ctx.fillStyle = color;
-
-    ctx.fillRect(
-      position.x * pixelWidth,
-      position.y * pixelWidth,
-      pixelWidth + 0.02,
-      pixelWidth + 0.02
-    );
-
-    layer.data[position.x][position.y] = color;
-  };
-
-  const refreshPixels = (params: {
-    layer: Layer;
-    ctx: CanvasRenderingContext2D;
-  }) => {
-    const { layer, ctx } = params;
-    const pixelWidth = (props.zoom * pixelRatio) / props.pixelSize.x;
-
-    for (let x = 0; x < layer.data.length; x++) {
-      for (let y = 0; y < layer.data[x].length; y++) {
-        if (layer.data[x][y] === "rgba(0, 0, 0, 0)") continue;
-        ctx.fillStyle = layer.data[x][y];
-
-        ctx.fillRect(
-          x * pixelWidth,
-          y * pixelWidth,
-          pixelWidth + 0.02,
-          pixelWidth + 0.02
-        );
-      }
-    }
-  };
-
-  const clear = (params: {
-    layerName: string;
-    ctx: CanvasRenderingContext2D;
-  }) => {
-    const { layerName, ctx } = params;
-    ctx.clearRect(0, 0, props.zoom * pixelRatio, props.zoom);
-    const foundLayer = layers.current.get(layerName);
-
-    if (foundLayer !== undefined) {
-      foundLayer.data = initLayer();
-    }
-
-    for (let [_, layer] of layers.current) {
-      refreshPixels({ layer, ctx });
-    }
-  };
-
-  useEffect(() => {
-    const canvas = canvasRef.current;
-    if (canvas === null) return;
-    const ctx = canvas.getContext("2d");
-    if (ctx === null) return;
-
-    for (let [_, layer] of layers.current) {
-      refreshPixels({
-        ctx,
-        layer: layer,
-      });
-    }
-  }, [props.zoom]);
-
-  return (
-    <div
-      className="w-full grow flex justify-center items-center"
-      onWheel={(e) => {
-        props.setZoom(props.zoom + e.deltaY * 0.05);
-      }}
-    >
-      <canvas
-        onMouseMove={(e) => {
-          const canvas = canvasRef.current;
-
-          if (canvas === null) return;
-
-          const ctx = canvas.getContext("2d");
-
-          if (ctx === null) return;
-
-          clear({
-            layerName: "brush",
-            ctx,
-          });
-
-          const getMousePos = (e: MouseEvent) => {
-            const rect = (
-              e.target as HTMLCanvasElement
-            ).getBoundingClientRect();
-
-            return {
-              x: e.clientX - rect.left,
-              y: e.clientY - rect.top,
-            };
-          };
-
-          // const mousePos = getMousePos(e);
-          // const pixelSize = (props.zoom * pixelRatio) / props.pixelSize.x;
-
-          //Math.abs(Math.floor(mousePos.x / pixelSize))
-        }}
-        ref={canvasRef}
-        className="bg-black"
-        width={pixelRatio * props.zoom}
-        height={props.zoom}
-      ></canvas>
-    </div>
   );
 }
 
