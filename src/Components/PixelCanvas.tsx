@@ -140,6 +140,19 @@ export default function PixelCanvas(props: {
             props.setZoom(props.zoom + 0.5);
           }
         }}
+        onMouseLeave={() => {
+          const ctx = canvasRef.current?.getContext("2d");
+          if (ctx === null || ctx === undefined) return;
+
+          clear({
+            ctx,
+            layerName: "brush",
+            layers: layers.current[0],
+            pixelCanvasDimensions: pixelCanvasDimensions,
+          });
+
+          mouseDownRef.current = false;
+        }}
         tabIndex={0}
         onMouseUp={() => (mouseDownRef.current = false)}
         ref={canvasRef}
@@ -211,8 +224,8 @@ const fillPixel = (params: {
   ctx.fillRect(
     position.x * pixelWidth,
     position.y * pixelWidth,
-    pixelWidth,
-    pixelWidth
+    pixelWidth + 1,
+    pixelWidth + 1
   );
 
   layer.data[position.x][position.y] = color;

@@ -11,8 +11,8 @@ export type Vector2 = {
 
 function App() {
   const [pixelSize, setPixelSize] = useState({
-    x: 16,
-    y: 16,
+    x: 32,
+    y: 32,
   });
 
   const [zoom, setZoom] = useState(100);
