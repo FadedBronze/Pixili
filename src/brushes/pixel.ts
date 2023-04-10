@@ -1,4 +1,4 @@
-import { clear, fillPixel } from "../Components/PixelCanvas";
+import { clear, fillPixel, fillPixelRect } from "../Components/PixelCanvas";
 import { Brush } from "./brush";
 
 export const pixel: Brush = {
@@ -26,6 +26,7 @@ export const pixel: Brush = {
     mousePos,
     layer,
     down,
+    brushState,
   }) => {
     clear({
       layerName: "brush",
@@ -34,12 +35,18 @@ export const pixel: Brush = {
       layers: layers,
     });
 
-    fillPixel({
-      ctx,
-      pixelCanvasDimensions,
-      layer: layers.get("brush")!,
+    const size =
+      (brushState.state.find(({ name }) => name === "scale")?.value as
+        | number
+        | undefined) ?? 1;
+
+    fillPixelRect({
       color,
+      ctx,
+      layer: layers.get("brush")!,
+      pixelCanvasDimensions,
       position: mousePos,
+      size,
     });
 
     if (!down) return;
@@ -47,12 +54,13 @@ export const pixel: Brush = {
     const drawLayer = layers.get(layer);
     if (drawLayer === undefined) return;
 
-    fillPixel({
-      ctx,
-      pixelCanvasDimensions,
-      layer: drawLayer,
+    fillPixelRect({
       color,
+      ctx,
+      layer: drawLayer,
+      pixelCanvasDimensions,
       position: mousePos,
+      size,
     });
   },
 };

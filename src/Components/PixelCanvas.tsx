@@ -12,6 +12,7 @@ export type PixelCanvasDimensions = {
   zoom: number;
   pixelRatio: number;
   pixelSize: Vector2;
+  pixelCount: Vector2;
 };
 
 export default function PixelCanvas(props: {
@@ -20,6 +21,7 @@ export default function PixelCanvas(props: {
   setZoom: (scroll: number) => void;
   currentLayer: string;
   brushState?: BrushState;
+  color: string;
 }) {
   const brushes = [pixel, eraser];
   const mouseDownRef = useRef(false);
@@ -28,6 +30,7 @@ export default function PixelCanvas(props: {
     zoom: props.zoom,
     pixelRatio: props.pixelSize.x / props.pixelSize.y,
     pixelSize: props.pixelSize,
+    pixelCount: props.pixelSize,
   };
 
   const layers = useRef<Map<string, Layer>>(
@@ -97,16 +100,46 @@ export default function PixelCanvas(props: {
             brushState: props.brushState,
             layer: props.currentLayer,
             layers: layers.current,
-            color: "red",
+            color: props.color,
             mousePos: mouseGridPos,
             pixelCanvasDimensions,
             down: mouseDownRef.current,
           });
         }}
-        onMouseDown={() => (mouseDownRef.current = true)}
+        onMouseDown={(e) => {
+          mouseDownRef.current = true;
+
+          const ctx = canvasRef.current?.getContext("2d");
+          if (ctx === null || ctx === undefined) return;
+
+          if (props.brushState === undefined) return;
+
+          const mousePos = getMousePos(e);
+          const pixelSize =
+            (props.zoom * pixelCanvasDimensions.pixelRatio) / props.pixelSize.x;
+          const mouseGridPos = {
+            x: Math.abs(Math.floor(mousePos.x / pixelSize)),
+            y: Math.abs(Math.floor(mousePos.y / pixelSize)),
+          };
+
+          const brush = brushes.find(
+            ({ name }) => name === props.brushState?.brushName
+          );
+
+          brush?.action({
+            ctx,
+            brushState: props.brushState,
+            layer: props.currentLayer,
+            layers: layers.current,
+            color: props.color,
+            mousePos: mouseGridPos,
+            pixelCanvasDimensions,
+            down: mouseDownRef.current,
+          });
+        }}
         onMouseUp={() => (mouseDownRef.current = false)}
         ref={canvasRef}
-        className="bg-black"
+        className="bg-white"
         width={pixelCanvasDimensions.pixelRatio * props.zoom}
         height={props.zoom}
       ></canvas>
@@ -123,6 +156,32 @@ const getMousePos = (e: MouseEvent) => {
   };
 };
 
+const fillPixelRect = (params: {
+  layer: Layer;
+  position: Vector2;
+  color: string;
+  ctx: CanvasRenderingContext2D;
+  pixelCanvasDimensions: PixelCanvasDimensions;
+  size: number;
+}) => {
+  const { layer, pixelCanvasDimensions, color, position, size, ctx } = params;
+
+  for (let i = 0; i < size; i++) {
+    for (let j = 0; j < size; j++) {
+      fillPixel({
+        ctx,
+        pixelCanvasDimensions,
+        layer: layer,
+        color,
+        position: {
+          x: position.x + i,
+          y: position.y + j,
+        },
+      });
+    }
+  }
+};
+
 const fillPixel = (params: {
   layer: Layer;
   position: Vector2;
@@ -136,6 +195,12 @@ const fillPixel = (params: {
       params.pixelCanvasDimensions.pixelRatio) /
     params.pixelCanvasDimensions.pixelSize.x;
   ctx.fillStyle = color;
+
+  if (
+    position.x > params.pixelCanvasDimensions.pixelCount.x - 1 ||
+    position.y > params.pixelCanvasDimensions.pixelCount.y - 1
+  )
+    return;
 
   ctx.fillRect(
     position.x * pixelWidth,
@@ -217,4 +282,4 @@ const clear = (params: {
   }
 };
 
-export { clear, fillPixel, initLayer, refreshPixels };
+export { clear, fillPixel, initLayer, refreshPixels, fillPixelRect };

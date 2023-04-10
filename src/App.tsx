@@ -21,6 +21,8 @@ function App() {
 
   const [brush, setBrush] = useState("pixel");
 
+  const [color, setColor] = useState("#ffffff");
+
   const [brushStates, setBrushStates] = useState<BrushState[]>([
     pixel.defaultState,
     eraser.defaultState,
@@ -57,9 +59,20 @@ function App() {
           setZoom={setZoom}
           currentLayer={currentLayer}
           brushState={brushStates.find(({ brushName }) => brushName === brush)}
+          color={color}
         />
       </div>
-      <div className="w-32 bg-slate-600"></div>
+      <div className="w-32 bg-slate-600">
+        <div className="w-full p-4 flex justify-center items-center aspect-square">
+          <input
+            type="color"
+            defaultValue={color}
+            onChange={(e) => {
+              setColor(e.currentTarget.value);
+            }}
+          />
+        </div>
+      </div>
     </div>
   );
 }
@@ -129,7 +142,7 @@ function BrushProperty(props: {
               setBrushPropertyState({
                 name: brushProperty.name,
                 showInViewer: brushProperty.showInViewer,
-                value: JSON.parse(e.currentTarget.value),
+                value: parseInt(e.currentTarget.value) ?? 1,
               });
             }}
             className="w-8 bg-slate-700"

@@ -1,4 +1,4 @@
-import { clear, fillPixel } from "../Components/PixelCanvas";
+import { clear, fillPixel, fillPixelRect } from "../Components/PixelCanvas";
 import { Brush } from "./brush";
 
 export const eraser: Brush = {
@@ -13,7 +13,15 @@ export const eraser: Brush = {
       },
     ],
   },
-  action: ({ ctx, pixelCanvasDimensions, layers, mousePos, layer, down }) => {
+  action: ({
+    ctx,
+    pixelCanvasDimensions,
+    layers,
+    mousePos,
+    layer,
+    down,
+    brushState,
+  }) => {
     clear({
       layerName: "brush",
       ctx,
@@ -21,11 +29,17 @@ export const eraser: Brush = {
       layers: layers,
     });
 
-    fillPixel({
+    const size =
+      (brushState.state.find(({ name }) => name === "scale")?.value as
+        | number
+        | undefined) ?? 1;
+
+    fillPixelRect({
+      size: size,
       ctx,
       pixelCanvasDimensions,
       layer: layers.get("brush")!,
-      color: "white",
+      color: "rgba(125, 125, 125, 0.5)",
       position: mousePos,
     });
 
@@ -34,7 +48,8 @@ export const eraser: Brush = {
     const drawLayer = layers.get(layer);
     if (drawLayer === undefined) return;
 
-    fillPixel({
+    fillPixelRect({
+      size: size,
       ctx,
       pixelCanvasDimensions,
       layer: drawLayer,
