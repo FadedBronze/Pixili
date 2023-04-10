@@ -12,7 +12,7 @@ export type BrushState = {
   state: BrushStateProperty[];
 };
 
-export type BrushActionFunction = (params: {
+export type BrushAction = (params: {
   brushState: BrushState;
   ctx: CanvasRenderingContext2D;
   layer: string;
@@ -20,13 +20,8 @@ export type BrushActionFunction = (params: {
   mousePos: Vector2;
   color: string;
   pixelCanvasDimensions: PixelCanvasDimensions;
+  down: boolean;
 }) => void;
-
-export type BrushAction = {
-  down: BrushActionFunction;
-  hold: BrushActionFunction;
-  up: BrushActionFunction;
-};
 
 export type Brush = {
   name: string;

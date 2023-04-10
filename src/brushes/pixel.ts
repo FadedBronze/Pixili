@@ -18,36 +18,41 @@ export const pixel: Brush = {
       },
     ],
   },
-  action: {
-    down: ({ ctx, pixelCanvasDimensions, layers, layer, color, mousePos }) => {
-      const drawLayer = layers.get(layer);
+  action: ({
+    ctx,
+    pixelCanvasDimensions,
+    layers,
+    color,
+    mousePos,
+    layer,
+    down,
+  }) => {
+    clear({
+      layerName: "brush",
+      ctx,
+      pixelCanvasDimensions: pixelCanvasDimensions,
+      layers: layers,
+    });
 
-      if (drawLayer === undefined) return;
+    fillPixel({
+      ctx,
+      pixelCanvasDimensions,
+      layer: layers.get("brush")!,
+      color,
+      position: mousePos,
+    });
 
-      fillPixel({
-        ctx,
-        pixelCanvasDimensions,
-        layer: drawLayer,
-        color,
-        position: mousePos,
-      });
-    },
-    hold: ({ ctx, pixelCanvasDimensions, layers, color, mousePos }) => {
-      clear({
-        layerName: "brush",
-        ctx,
-        pixelCanvasDimensions: pixelCanvasDimensions,
-        layers: layers,
-      });
+    if (!down) return;
 
-      fillPixel({
-        ctx,
-        pixelCanvasDimensions,
-        layer: layers.get("brush")!,
-        color,
-        position: mousePos,
-      });
-    },
-    up: ({}) => {},
+    const drawLayer = layers.get(layer);
+    if (drawLayer === undefined) return;
+
+    fillPixel({
+      ctx,
+      pixelCanvasDimensions,
+      layer: drawLayer,
+      color,
+      position: mousePos,
+    });
   },
 };

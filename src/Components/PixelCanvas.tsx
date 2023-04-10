@@ -21,7 +21,7 @@ export default function PixelCanvas(props: {
   brushState?: BrushState;
 }) {
   const brushes = [pixel];
-
+  const mouseDownRef = useRef(false);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const pixelCanvasDimensions = {
     zoom: props.zoom,
@@ -77,17 +77,6 @@ export default function PixelCanvas(props: {
           const ctx = canvasRef.current?.getContext("2d");
           if (ctx === null || ctx === undefined) return;
 
-          const getMousePos = (e: MouseEvent) => {
-            const rect = (
-              e.target as HTMLCanvasElement
-            ).getBoundingClientRect();
-
-            return {
-              x: e.clientX - rect.left,
-              y: e.clientY - rect.top,
-            };
-          };
-
           if (props.brushState === undefined) return;
 
           const mousePos = getMousePos(e);
@@ -102,16 +91,19 @@ export default function PixelCanvas(props: {
             ({ name }) => name === props.brushState?.brushName
           );
 
-          brush?.action.hold({
+          brush?.action({
             ctx,
             brushState: props.brushState,
-            layer: "brush",
+            layer: props.currentLayer,
             layers: layers.current,
             color: "red",
             mousePos: mouseGridPos,
             pixelCanvasDimensions,
+            down: mouseDownRef.current,
           });
         }}
+        onMouseDown={() => (mouseDownRef.current = true)}
+        onMouseUp={() => (mouseDownRef.current = false)}
         ref={canvasRef}
         className="bg-black"
         width={pixelCanvasDimensions.pixelRatio * props.zoom}
@@ -120,6 +112,15 @@ export default function PixelCanvas(props: {
     </div>
   );
 }
+
+const getMousePos = (e: MouseEvent) => {
+  const rect = (e.target as HTMLCanvasElement).getBoundingClientRect();
+
+  return {
+    x: e.clientX - rect.left,
+    y: e.clientY - rect.top,
+  };
+};
 
 const fillPixel = (params: {
   layer: Layer;
@@ -138,8 +139,8 @@ const fillPixel = (params: {
   ctx.fillRect(
     position.x * pixelWidth,
     position.y * pixelWidth,
-    pixelWidth + 0.02,
-    pixelWidth + 0.02
+    pixelWidth + 1,
+    pixelWidth + 1
   );
 
   layer.data[position.x][position.y] = color;
@@ -164,8 +165,8 @@ const refreshPixels = (params: {
       ctx.fillRect(
         x * pixelWidth,
         y * pixelWidth,
-        pixelWidth + 0.02,
-        pixelWidth + 0.02
+        pixelWidth + 1,
+        pixelWidth + 1
       );
     }
   }
