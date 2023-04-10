@@ -22,7 +22,7 @@ function App() {
   const [brush, setBrush] = useState("pixel");
 
   const [brushStates, setBrushStates] = useState<BrushState[]>([
-    pixel.defaultBrushState,
+    pixel.defaultState,
   ]);
 
   const currentBrushState = brushStates.find(

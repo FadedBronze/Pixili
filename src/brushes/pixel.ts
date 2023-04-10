@@ -1,8 +1,9 @@
+import { clear, fillPixel } from "../Components/PixelCanvas";
 import { Brush } from "./brush";
 
 export const pixel: Brush = {
   name: "pixel",
-  defaultBrushState: {
+  defaultState: {
     brushName: "pixel",
     state: [
       {
@@ -17,10 +18,36 @@ export const pixel: Brush = {
       },
     ],
   },
-  brushAction: {
-    name: "pixel",
-    down: ({ mousePos, color }) => {},
-    hold: ({}) => {},
+  action: {
+    down: ({ ctx, pixelCanvasDimensions, layers, layer, color, mousePos }) => {
+      const drawLayer = layers.get(layer);
+
+      if (drawLayer === undefined) return;
+
+      fillPixel({
+        ctx,
+        pixelCanvasDimensions,
+        layer: drawLayer,
+        color,
+        position: mousePos,
+      });
+    },
+    hold: ({ ctx, pixelCanvasDimensions, layers, color, mousePos }) => {
+      clear({
+        layerName: "brush",
+        ctx,
+        pixelCanvasDimensions: pixelCanvasDimensions,
+        layers: layers,
+      });
+
+      fillPixel({
+        ctx,
+        pixelCanvasDimensions,
+        layer: layers.get("brush")!,
+        color,
+        position: mousePos,
+      });
+    },
     up: ({}) => {},
   },
 };

@@ -1,6 +1,7 @@
 import { MouseEvent, useEffect, useRef } from "react";
 import { Vector2 } from "../App";
 import { BrushState } from "../brushes/brush";
+import { pixel } from "../brushes/pixel";
 
 export type Layer = {
   data: string[][];
@@ -19,6 +20,8 @@ export default function PixelCanvas(props: {
   currentLayer: string;
   brushState?: BrushState;
 }) {
+  const brushes = [pixel];
+
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const pixelCanvasDimensions = {
     zoom: props.zoom,
@@ -71,20 +74,8 @@ export default function PixelCanvas(props: {
     >
       <canvas
         onMouseMove={(e: MouseEvent) => {
-          const canvas = canvasRef.current;
-
-          if (canvas === null) return;
-
-          const ctx = canvas.getContext("2d");
-
-          if (ctx === null) return;
-
-          clear({
-            layerName: "brush",
-            ctx,
-            pixelCanvasDimensions: pixelCanvasDimensions,
-            layers: layers.current,
-          });
+          const ctx = canvasRef.current?.getContext("2d");
+          if (ctx === null || ctx === undefined) return;
 
           const getMousePos = (e: MouseEvent) => {
             const rect = (
@@ -97,10 +88,29 @@ export default function PixelCanvas(props: {
             };
           };
 
+          if (props.brushState === undefined) return;
+
           const mousePos = getMousePos(e);
           const pixelSize =
             (props.zoom * pixelCanvasDimensions.pixelRatio) / props.pixelSize.x;
-          const mouseGridPos = Math.abs(Math.floor(mousePos.x / pixelSize));
+          const mouseGridPos = {
+            x: Math.abs(Math.floor(mousePos.x / pixelSize)),
+            y: Math.abs(Math.floor(mousePos.y / pixelSize)),
+          };
+
+          const brush = brushes.find(
+            ({ name }) => name === props.brushState?.brushName
+          );
+
+          brush?.action.hold({
+            ctx,
+            brushState: props.brushState,
+            layer: "brush",
+            layers: layers.current,
+            color: "red",
+            mousePos: mouseGridPos,
+            pixelCanvasDimensions,
+          });
         }}
         ref={canvasRef}
         className="bg-black"

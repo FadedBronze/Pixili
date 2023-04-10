@@ -1,5 +1,5 @@
 import type { Vector2 } from "../App";
-import { Layer } from "../Components/PixelCanvas";
+import { Layer, PixelCanvasDimensions } from "../Components/PixelCanvas";
 
 export type BrushStateProperty = {
   showInViewer: boolean;
@@ -15,13 +15,14 @@ export type BrushState = {
 export type BrushActionFunction = (params: {
   brushState: BrushState;
   ctx: CanvasRenderingContext2D;
-  layer: Layer;
-  mousePos?: Vector2;
-  color?: string;
+  layer: string;
+  layers: Map<string, Layer>;
+  mousePos: Vector2;
+  color: string;
+  pixelCanvasDimensions: PixelCanvasDimensions;
 }) => void;
 
 export type BrushAction = {
-  name: string;
   down: BrushActionFunction;
   hold: BrushActionFunction;
   up: BrushActionFunction;
@@ -29,9 +30,6 @@ export type BrushAction = {
 
 export type Brush = {
   name: string;
-  defaultBrushState: BrushState;
-  brushAction: BrushAction;
+  defaultState: BrushState;
+  action: BrushAction;
 };
-
-import { pixel } from "./pixel";
-export const brushActions = [pixel];
