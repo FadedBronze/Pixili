@@ -7,7 +7,6 @@ export const eraser: Brush = {
     brushName: "eraser",
     state: [
       {
-        showInViewer: true,
         name: "scale",
         value: 1,
       },

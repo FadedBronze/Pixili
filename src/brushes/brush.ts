@@ -2,11 +2,11 @@ import type { Vector2 } from "../App";
 import { Layer, PixelCanvasDimensions } from "../Components/PixelCanvas";
 import { pixel } from "../brushes/pixel";
 import { eraser } from "../brushes/eraser";
+import { bucket } from "./bucket";
 
 export type BrushStateProperty = {
-  showInViewer: boolean;
   name: string;
-  value: number | string[] | boolean;
+  value: number | boolean;
 };
 
 export type BrushState = {
@@ -32,5 +32,5 @@ export type Brush = {
 };
 
 export function brushes() {
-  return [pixel, eraser]; // any new brushes must be added here
+  return [pixel, eraser, bucket]; // any new brushes must be added here
 }

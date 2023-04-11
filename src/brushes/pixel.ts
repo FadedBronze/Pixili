@@ -7,12 +7,10 @@ export const pixel: Brush = {
     brushName: "pixel",
     state: [
       {
-        showInViewer: true,
         name: "pixel perfect",
         value: false,
       },
       {
-        showInViewer: true,
         name: "scale",
         value: 1,
       },

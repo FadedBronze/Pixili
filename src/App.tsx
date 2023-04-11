@@ -32,7 +32,11 @@ function App() {
   return (
     <div className="App flex w-full h-screen">
       <div className="w-fit bg-slate-600 flex">
-        <Brushes brush={brush} setBrush={setBrush}></Brushes>
+        <Brushes
+          brush={brush}
+          setBrush={setBrush}
+          brushStates={brushStates}
+        ></Brushes>
       </div>
       <div className="grow bg-slate-900 flex flex-col">
         <div className="w-full h-fit bg-slate-800">
@@ -226,16 +230,21 @@ function BrushProperty(props: {
 function Brushes(props: {
   brush: string;
   setBrush: (newBrush: string) => void;
+  brushStates: BrushState[];
 }) {
   const select = (name: string) => props.setBrush(name);
   const selected = (name: string) => props.brush === name;
 
   return (
     <div className="p-4 flex flex-wrap grow w-full gap-2 justify-top flex-col align-center">
-      <Brush name="pixel" select={select} selected={selected}></Brush>
-      <Brush name="eraser" select={select} selected={selected}></Brush>
-      <Brush name="lasso" select={select} selected={selected}></Brush>
-      <Brush name="crop" select={select} selected={selected}></Brush>
+      {props.brushStates.map(({ brushName }) => (
+        <Brush
+          name={brushName}
+          key={brushName}
+          select={select}
+          selected={selected}
+        ></Brush>
+      ))}
     </div>
   );
 }

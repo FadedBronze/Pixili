@@ -29,6 +29,10 @@ export default function PixelCanvas(props: {
     pixelSize: props.pixelSize,
     pixelCount: props.pixelSize,
   };
+  const mousePosRef = useRef({
+    x: 0,
+    y: 0,
+  });
 
   const layers = useRef<Map<string, Layer>[]>([
     new Map([
@@ -68,13 +72,12 @@ export default function PixelCanvas(props: {
     }
   };
 
-  const draw = (e: MouseEvent) => {
+  const draw = (mousePos: Vector2) => {
     const ctx = canvasRef.current?.getContext("2d");
     if (ctx === null || ctx === undefined) return;
 
     if (props.brushState === undefined) return;
 
-    const mousePos = getMousePos(e);
     const pixelSize =
       (props.zoom * pixelCanvasDimensions.pixelRatio) / props.pixelSize.x;
     const mouseGridPos = {
@@ -107,7 +110,7 @@ export default function PixelCanvas(props: {
     >
       <canvas
         onMouseMove={(e: MouseEvent) => {
-          draw(e);
+          draw(getMousePos(e));
         }}
         onMouseDown={(e) => {
           mouseDownRef.current = true;
@@ -117,7 +120,7 @@ export default function PixelCanvas(props: {
           ) as Map<string, Layer>;
 
           layers.current.unshift(present);
-          draw(e);
+          draw(getMousePos(e));
         }}
         onKeyDown={(e) => {
           const ctx = canvasRef.current?.getContext("2d");
