@@ -1,5 +1,7 @@
 import type { Vector2 } from "../App";
 import { Layer, PixelCanvasDimensions } from "../Components/PixelCanvas";
+import { pixel } from "../brushes/pixel";
+import { eraser } from "../brushes/eraser";
 
 export type BrushStateProperty = {
   showInViewer: boolean;
@@ -28,3 +30,7 @@ export type Brush = {
   defaultState: BrushState;
   action: BrushAction;
 };
+
+export function brushes() {
+  return [pixel, eraser]; // any new brushes must be added here
+}

@@ -1,8 +1,6 @@
 import { useEffect, useState } from "react";
-import { BrushState, BrushStateProperty } from "./brushes/brush";
-import { pixel } from "./brushes/pixel";
+import { BrushState, BrushStateProperty, brushes } from "./brushes/brush";
 import PixelCanvas from "./Components/PixelCanvas";
-import { eraser } from "./brushes/eraser";
 
 export type Vector2 = {
   x: number;
@@ -23,10 +21,9 @@ function App() {
 
   const [color, setColor] = useState("#ffffff");
 
-  const [brushStates, setBrushStates] = useState<BrushState[]>([
-    pixel.defaultState,
-    eraser.defaultState,
-  ]);
+  const [brushStates, setBrushStates] = useState<BrushState[]>(
+    brushes().map((brush) => brush.defaultState)
+  );
 
   const currentBrushState = brushStates.find(
     ({ brushName }) => brushName === brush

@@ -1,8 +1,6 @@
 import { MouseEvent, useEffect, useRef, useState } from "react";
 import { Vector2 } from "../App";
-import { BrushState } from "../brushes/brush";
-import { pixel } from "../brushes/pixel";
-import { eraser } from "../brushes/eraser";
+import { BrushState, brushes } from "../brushes/brush";
 
 export type Layer = {
   data: string[][];
@@ -23,7 +21,6 @@ export default function PixelCanvas(props: {
   brushState?: BrushState;
   color: string;
 }) {
-  const brushes = [pixel, eraser];
   const mouseDownRef = useRef(false);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const pixelCanvasDimensions = {
@@ -85,7 +82,7 @@ export default function PixelCanvas(props: {
       y: Math.abs(Math.floor(mousePos.y / pixelSize)),
     };
 
-    const brush = brushes.find(
+    const brush = brushes().find(
       ({ name }) => name === props.brushState?.brushName
     );
 
