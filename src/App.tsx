@@ -184,9 +184,9 @@ function BrushProperty(props: {
   setBrushPropertyState: (newState: BrushStateProperty) => void;
 }) {
   const { brushProperty, setBrushPropertyState } = props;
-  const { name, showInViewer, value } = brushProperty;
+  const { name, value } = brushProperty;
 
-  return showInViewer ? (
+  return (
     <>
       {typeof value == "boolean" && (
         <div className="flex gap-2 text-slate-100 border-r pr-2">
@@ -197,7 +197,6 @@ function BrushProperty(props: {
             onChange={(e) => {
               setBrushPropertyState({
                 name: brushProperty.name,
-                showInViewer: brushProperty.showInViewer,
                 value: e.currentTarget.checked,
               });
             }}
@@ -213,7 +212,6 @@ function BrushProperty(props: {
             onChange={(e) => {
               setBrushPropertyState({
                 name: brushProperty.name,
-                showInViewer: brushProperty.showInViewer,
                 value: parseInt(e.currentTarget.value) ?? 1,
               });
             }}
@@ -222,8 +220,6 @@ function BrushProperty(props: {
         </div>
       )}
     </>
-  ) : (
-    <></>
   );
 }
 
