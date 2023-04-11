@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { BrushState, BrushStateProperty } from "./brushes/brush";
 import { pixel } from "./brushes/pixel";
 import PixelCanvas from "./Components/PixelCanvas";
@@ -62,18 +62,93 @@ function App() {
           color={color}
         />
       </div>
-      <div className="w-32 bg-slate-600">
-        <div className="w-full p-4 flex justify-center items-center aspect-square">
-          <input
-            type="color"
-            defaultValue={color}
-            onChange={(e) => {
-              setColor(e.currentTarget.value);
-            }}
-          />
-        </div>
+      <div className="w-44 bg-slate-600">
+        <ColorViewer color={color} setColor={setColor} />
       </div>
     </div>
+  );
+}
+
+function ColorViewer(props: {
+  color: string;
+  setColor: (value: string) => void;
+}) {
+  const [colors, setColors] = useState([
+    "#FF00FF",
+    "#FF0000",
+    "#FFFF00",
+    "#00FF00",
+    "#00FFFF",
+    "#0000FF",
+  ]);
+
+  const [selectedColor, setSelectedColor] = useState("#0000FF");
+
+  const addColor = (color: string) => {
+    if (colors.includes(color.toLocaleUpperCase())) return;
+    setColors([...colors, color.toLocaleUpperCase()]);
+  };
+
+  return (
+    <div className="p-2">
+      <div className="w-full flex justify-center items-center aspect-square border-b border-white">
+        <input
+          className=""
+          type="color"
+          value={props.color}
+          onChange={(e) => {
+            props.setColor(e.currentTarget.value);
+          }}
+        />
+      </div>
+      <div className="flex border-b border-white p-2 flex-wrap">
+        {colors.map((color) => (
+          <ColorOption
+            selected={selectedColor === color}
+            select={() => setSelectedColor(color)}
+            delete={() =>
+              setColors(colors.filter((newColor) => newColor !== color))
+            }
+            setColor={() => props.setColor(color)}
+            color={color}
+            key={color}
+          />
+        ))}
+        <button
+          className="w-1/4 aspect-square bg-slate-500 text-white"
+          onClick={() => {
+            addColor(props.color);
+          }}
+        >
+          Add
+        </button>
+      </div>
+    </div>
+  );
+}
+
+function ColorOption(props: {
+  color: string;
+  setColor: () => void;
+  selected: boolean;
+  select: () => void;
+  delete: () => void;
+}) {
+  return (
+    <button
+      className={`w-1/4 aspect-square ${
+        props.selected ? "border-2 border-white" : ""
+      }`}
+      onClick={() => {
+        if (props.selected) props.delete();
+
+        props.select();
+        props.setColor();
+      }}
+      style={{
+        backgroundColor: props.color,
+      }}
+    ></button>
   );
 }
 
