@@ -33,7 +33,7 @@ export const bucket: Brush = {
 
     if (!down) return;
     const currentLayer = layers.get(layer)!.data;
-    const replacingColor = "rgba(0, 0, 0, 0)";
+    const replacingColor = currentLayer[mousePos.x][mousePos.y];
 
     const flood_fill = (x: number, y: number) => {
       if (
