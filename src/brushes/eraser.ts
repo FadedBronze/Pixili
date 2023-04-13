@@ -34,7 +34,7 @@ export const eraser: Brush = {
         | undefined) ?? 1;
 
     fillPixelRect({
-      size: size,
+      size: { x: size, y: size },
       ctx,
       pixelCanvasDimensions,
       layer: layers.get("brush")!,
@@ -48,7 +48,7 @@ export const eraser: Brush = {
     if (drawLayer === undefined) return;
 
     fillPixelRect({
-      size: size,
+      size: { x: size, y: size },
       ctx,
       pixelCanvasDimensions,
       layer: drawLayer,

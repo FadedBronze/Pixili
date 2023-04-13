@@ -22,6 +22,10 @@ export default function PixelCanvas(props: {
   color: string;
 }) {
   const mouseDownRef = useRef(false);
+  const startingMousePos = useRef({
+    x: 0,
+    y: 0,
+  });
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const pixelCanvasDimensions = {
     zoom: props.zoom,
@@ -29,10 +33,6 @@ export default function PixelCanvas(props: {
     pixelSize: props.pixelSize,
     pixelCount: props.pixelSize,
   };
-  const mousePosRef = useRef({
-    x: 0,
-    y: 0,
-  });
 
   const layers = useRef<Map<string, Layer>[]>([
     new Map([
@@ -98,6 +98,7 @@ export default function PixelCanvas(props: {
       mousePos: mouseGridPos,
       pixelCanvasDimensions,
       down: mouseDownRef.current,
+      startingMousePos: startingMousePos.current,
     });
   };
 
@@ -113,6 +114,7 @@ export default function PixelCanvas(props: {
           draw(getMousePos(e));
         }}
         onMouseDown={(e) => {
+          const mousePos = getMousePos(e);
           mouseDownRef.current = true;
 
           const present = new Map(
@@ -120,7 +122,17 @@ export default function PixelCanvas(props: {
           ) as Map<string, Layer>;
 
           layers.current.unshift(present);
-          draw(getMousePos(e));
+
+          const pixelSize =
+            (props.zoom * pixelCanvasDimensions.pixelRatio) / props.pixelSize.x;
+          const mouseGridPos = {
+            x: Math.abs(Math.floor(mousePos.x / pixelSize)),
+            y: Math.abs(Math.floor(mousePos.y / pixelSize)),
+          };
+
+          startingMousePos.current = mouseGridPos;
+
+          draw(mousePos);
         }}
         onKeyDown={(e) => {
           const ctx = canvasRef.current?.getContext("2d");
@@ -181,20 +193,24 @@ const fillPixelRect = (params: {
   color: string;
   ctx: CanvasRenderingContext2D;
   pixelCanvasDimensions: PixelCanvasDimensions;
-  size: number;
+  size: Vector2;
 }) => {
   const { layer, pixelCanvasDimensions, color, position, size, ctx } = params;
 
-  for (let i = 0; i < size; i++) {
-    for (let j = 0; j < size; j++) {
+  const signOf = (num: number) => {
+    return num / Math.abs(num);
+  };
+
+  for (let i = 0; i < Math.abs(size.x); i++) {
+    for (let j = 0; j < Math.abs(size.y); j++) {
       fillPixel({
         ctx,
         pixelCanvasDimensions,
         layer: layer,
         color,
         position: {
-          x: position.x + i,
-          y: position.y + j,
+          x: position.x + signOf(size.x) * i,
+          y: position.y + signOf(size.y) * j,
         },
       });
     }

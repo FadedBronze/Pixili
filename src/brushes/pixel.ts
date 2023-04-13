@@ -44,7 +44,7 @@ export const pixel: Brush = {
       layer: layers.get("brush")!,
       pixelCanvasDimensions,
       position: mousePos,
-      size,
+      size: { x: size, y: size },
     });
 
     if (!down) return;
@@ -58,7 +58,7 @@ export const pixel: Brush = {
       layer: drawLayer,
       pixelCanvasDimensions,
       position: mousePos,
-      size,
+      size: { x: size, y: size },
     });
   },
 };

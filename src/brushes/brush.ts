@@ -3,6 +3,7 @@ import { Layer, PixelCanvasDimensions } from "../Components/PixelCanvas";
 import { pixel } from "../brushes/pixel";
 import { eraser } from "../brushes/eraser";
 import { bucket } from "./bucket";
+import { select } from "./select";
 
 export type BrushStateProperty = {
   name: string;
@@ -23,6 +24,7 @@ export type BrushAction = (params: {
   color: string;
   pixelCanvasDimensions: PixelCanvasDimensions;
   down: boolean;
+  startingMousePos: Vector2;
 }) => void;
 
 export type Brush = {
@@ -32,5 +34,5 @@ export type Brush = {
 };
 
 export function brushes() {
-  return [pixel, eraser, bucket]; // any new brushes must be added here
+  return [pixel, eraser, bucket, select]; // any new brushes must be added here
 }
