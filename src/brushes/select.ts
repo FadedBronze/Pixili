@@ -1,9 +1,14 @@
 import { clear, fillPixel, fillPixelRect } from "../Components/PixelCanvas";
 import { Brush } from "./brush";
 
-export const select: Brush = {
+const selectData = {
+  selecting: false,
+};
+
+export const select: Brush<typeof selectData> = {
   name: "select",
   state: [],
+  data: selectData,
   action: ({
     ctx,
     pixelCanvasDimensions,
@@ -14,7 +19,10 @@ export const select: Brush = {
     down,
     brushState,
     startingMousePos,
+    brushData,
   }) => {
+    const data = brushData.data as typeof selectData;
+
     clear({
       layerName: "brush",
       ctx,
@@ -24,16 +32,18 @@ export const select: Brush = {
 
     //startingMousePos
 
-    fillPixelRect({
-      size: {
-        x: startingMousePos.x - mousePos.x,
-        y: startingMousePos.y - mousePos.y,
-      },
-      color: "rgba(125, 125, 125, 0.5)",
-      ctx,
-      layer: layers.get("brush")!,
-      pixelCanvasDimensions,
-      position: mousePos,
-    });
+    if (down) {
+      fillPixelRect({
+        size: {
+          x: startingMousePos.x - mousePos.x,
+          y: startingMousePos.y - mousePos.y,
+        },
+        color: "rgba(125, 125, 125, 0.5)",
+        ctx,
+        layer: layers.get("brush")!,
+        pixelCanvasDimensions,
+        position: mousePos,
+      });
+    }
   },
 };

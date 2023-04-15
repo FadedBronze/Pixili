@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { BrushState, BrushStateProperty, brushes } from "./brushes/brush";
 import PixelCanvas from "./Components/PixelCanvas";
 import { usePreventCtrlMousewheel } from "./hooks/usePreventCtrlMousewheel";
@@ -28,7 +28,18 @@ function App() {
     brushes().map((brush) => ({ name: brush.name, state: brush.state }))
   );
 
-  const currentBrushState = brushStates.find(({ name }) => name === brush);
+  const brushData = useRef(
+    brushes().map((brush) => ({ name: brush.name, data: brush.data }))
+  );
+
+  const currentBrushState = useMemo(
+    () => brushStates.find(({ name }) => name === brush),
+    [brush]
+  );
+  const currentBrushData = useMemo(
+    () => brushData.current.find(({ name }) => name === brush),
+    [brush]
+  );
 
   return (
     <div className="App flex w-full h-screen">
@@ -53,14 +64,17 @@ function App() {
             ></PropertyViewer>
           )}
         </div>
-        <PixelCanvas
-          pixelSize={pixelSize}
-          zoom={zoom}
-          setZoom={setZoom}
-          currentLayer={currentLayer}
-          brushState={brushStates.find(({ name }) => name === brush)}
-          color={color}
-        />
+        {currentBrushState && currentBrushData && (
+          <PixelCanvas
+            pixelSize={pixelSize}
+            zoom={zoom}
+            setZoom={setZoom}
+            currentLayer={currentLayer}
+            state={currentBrushState}
+            data={currentBrushData}
+            color={color}
+          />
+        )}
       </div>
       <div className="w-44 bg-slate-600">
         <ColorViewer color={color} setColor={setColor} />

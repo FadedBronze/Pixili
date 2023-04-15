@@ -1,9 +1,10 @@
 import { Layer, clear, fillPixel } from "../Components/PixelCanvas";
 import { Brush, BrushState, BrushStateProperty } from "./brush";
 
-export const bucket: Brush = {
+export const bucket: Brush<null> = {
   name: "bucket",
   state: [],
+  data: null,
   action: ({
     ctx,
     pixelCanvasDimensions,

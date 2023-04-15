@@ -1,8 +1,9 @@
 import { clear, fillPixel, fillPixelRect } from "../Components/PixelCanvas";
 import { Brush, getStateAs } from "./brush";
 
-export const eraser: Brush = {
+export const eraser: Brush<null> = {
   name: "eraser",
+  data: null,
   state: [
     {
       name: "scale",

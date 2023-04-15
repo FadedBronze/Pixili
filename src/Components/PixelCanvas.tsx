@@ -18,7 +18,8 @@ export default function PixelCanvas(props: {
   zoom: number;
   setZoom: (scroll: number) => void;
   currentLayer: string;
-  brushState?: BrushState;
+  state: BrushState;
+  data: { name: string; data: any };
   color: string;
 }) {
   const mousePos = useRef({ x: 0, y: 0 });
@@ -77,7 +78,7 @@ export default function PixelCanvas(props: {
     const ctx = canvasRef.current?.getContext("2d");
     if (ctx === null || ctx === undefined) return;
 
-    if (props.brushState === undefined) return;
+    if (props.state === undefined) return;
 
     const pixelSize =
       (props.zoom * pixelCanvasDimensions.pixelRatio) / props.pixelSize.x;
@@ -86,11 +87,11 @@ export default function PixelCanvas(props: {
       y: Math.abs(Math.floor(mousePos.y / pixelSize)),
     };
 
-    const brush = brushes().find(({ name }) => name === props.brushState?.name);
+    const brush = brushes().find(({ name }) => name === props.state?.name);
 
     brush?.action({
       ctx,
-      brushState: props.brushState,
+      brushState: props.state,
       layer: props.currentLayer,
       layers: layers.current[0],
       color: props.color,
@@ -98,6 +99,7 @@ export default function PixelCanvas(props: {
       pixelCanvasDimensions,
       down: mouseDownRef.current,
       startingMousePos: startingMousePos.current,
+      brushData: props.data,
     });
   };
 
@@ -106,11 +108,9 @@ export default function PixelCanvas(props: {
       className="w-full grow flex justify-center items-center"
       onWheel={(e) => {
         if (e.shiftKey) {
-          if (!props.brushState) return;
+          if (!props.state) return;
 
-          const scale = props.brushState.state.find(
-            ({ name }) => name === "scale"
-          );
+          const scale = props.state.state.find(({ name }) => name === "scale");
 
           if (scale === undefined) return;
 

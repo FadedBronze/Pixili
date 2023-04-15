@@ -17,6 +17,7 @@ export type BrushState = {
 
 export type BrushAction = (params: {
   brushState: BrushState;
+  brushData: { name: string; data: any };
   ctx: CanvasRenderingContext2D;
   layer: string;
   layers: Map<string, Layer>;
@@ -27,9 +28,10 @@ export type BrushAction = (params: {
   startingMousePos: Vector2;
 }) => void;
 
-export type Brush = {
+export type Brush<T> = {
   name: string;
   state: BrushStateProperty[];
+  data: T;
   action: BrushAction;
 };
 
