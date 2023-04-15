@@ -1,6 +1,6 @@
 import { MouseEvent, useEffect, useRef, useState } from "react";
 import { Vector2 } from "../App";
-import { BrushState, brushes } from "../brushes/brush";
+import { BrushState, brushes, getStateAs } from "../brushes/brush";
 
 export type Layer = {
   data: string[][];
@@ -21,6 +21,7 @@ export default function PixelCanvas(props: {
   brushState?: BrushState;
   color: string;
 }) {
+  const mousePos = useRef({ x: 0, y: 0 });
   const mouseDownRef = useRef(false);
   const startingMousePos = useRef({
     x: 0,
@@ -106,12 +107,29 @@ export default function PixelCanvas(props: {
     <div
       className="w-full grow flex justify-center items-center"
       onWheel={(e) => {
+        if (e.shiftKey) {
+          if (!props.brushState) return;
+
+          const scale = props.brushState.state.find(
+            ({ name }) => name === "scale"
+          );
+
+          if (scale === undefined) return;
+
+          (scale.value as number) += Math.floor(e.deltaY * 0.01);
+          scale.value = Math.max(1, scale.value as number);
+
+          draw(mousePos.current);
+
+          return;
+        }
         props.setZoom(props.zoom + e.deltaY * 0.05);
       }}
     >
       <canvas
         onMouseMove={(e: MouseEvent) => {
           draw(getMousePos(e));
+          mousePos.current = getMousePos(e);
         }}
         onMouseDown={(e) => {
           const mousePos = getMousePos(e);
