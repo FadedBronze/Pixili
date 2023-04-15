@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { BrushState, BrushStateProperty, brushes } from "./brushes/brush";
 import PixelCanvas from "./Components/PixelCanvas";
+import { usePreventCtrlMousewheel } from "./hooks/usePreventCtrlMousewheel";
 
 export type Vector2 = {
   x: number;
@@ -8,6 +9,8 @@ export type Vector2 = {
 };
 
 function App() {
+  usePreventCtrlMousewheel();
+
   const [pixelSize, setPixelSize] = useState({
     x: 32,
     y: 32,

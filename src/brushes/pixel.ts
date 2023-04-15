@@ -1,5 +1,5 @@
 import { clear, fillPixel, fillPixelRect } from "../Components/PixelCanvas";
-import { Brush } from "./brush";
+import { Brush, getStateAs } from "./brush";
 
 export const pixel: Brush = {
   name: "pixel",
@@ -33,10 +33,7 @@ export const pixel: Brush = {
       layers: layers,
     });
 
-    const size =
-      (brushState.state.find(({ name }) => name === "scale")?.value as
-        | number
-        | undefined) ?? 1;
+    const size = getStateAs<number>(brushState, "scale") ?? 1;
 
     fillPixelRect({
       color,

@@ -36,3 +36,7 @@ export type Brush = {
 export function brushes() {
   return [pixel, eraser, bucket, select]; // any new brushes must be added here
 }
+
+export const getStateAs = <T>(state: BrushState, query: string) => {
+  return state.state.find(({ name }) => name === query)?.value as T | undefined;
+};
