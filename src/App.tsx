@@ -25,12 +25,10 @@ function App() {
   const [color, setColor] = useState("#ffffff");
 
   const [brushStates, setBrushStates] = useState<BrushState[]>(
-    brushes().map((brush) => brush.defaultState)
+    brushes().map((brush) => ({ name: brush.name, state: brush.state }))
   );
 
-  const currentBrushState = brushStates.find(
-    ({ brushName }) => brushName === brush
-  );
+  const currentBrushState = brushStates.find(({ name }) => name === brush);
 
   return (
     <div className="App flex w-full h-screen">
@@ -48,9 +46,7 @@ function App() {
               currentBrushState={currentBrushState}
               setCurrentBrushState={(newState: BrushState) =>
                 setBrushStates([
-                  ...brushStates.filter(
-                    ({ brushName }) => brushName !== newState.brushName
-                  ),
+                  ...brushStates.filter(({ name }) => name !== newState.name),
                   newState,
                 ])
               }
@@ -62,7 +58,7 @@ function App() {
           zoom={zoom}
           setZoom={setZoom}
           currentLayer={currentLayer}
-          brushState={brushStates.find(({ brushName }) => brushName === brush)}
+          brushState={brushStates.find(({ name }) => name === brush)}
           color={color}
         />
       </div>
@@ -165,10 +161,10 @@ function PropertyViewer(props: {
       {props.currentBrushState.state.map((brushProperty) => (
         <BrushProperty
           brushProperty={brushProperty}
-          key={props.currentBrushState.brushName + "-" + brushProperty.name}
+          key={props.currentBrushState.name + "-" + brushProperty.name}
           setBrushPropertyState={(newState: BrushStateProperty) => {
             props.setCurrentBrushState({
-              brushName: props.currentBrushState.brushName,
+              name: props.currentBrushState.name,
               state: [
                 ...props.currentBrushState.state.map((oldState) => {
                   if (newState.name === oldState.name) {
@@ -240,10 +236,10 @@ function Brushes(props: {
 
   return (
     <div className="p-4 flex flex-wrap grow w-full gap-2 justify-top flex-col align-center">
-      {props.brushStates.map(({ brushName }) => (
+      {props.brushStates.map(({ name }) => (
         <Brush
-          name={brushName}
-          key={brushName}
+          name={name}
+          key={name}
           select={select}
           selected={selected}
         ></Brush>

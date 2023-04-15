@@ -11,7 +11,7 @@ export type BrushStateProperty = {
 };
 
 export type BrushState = {
-  brushName: string;
+  name: string;
   state: BrushStateProperty[];
 };
 
@@ -29,7 +29,7 @@ export type BrushAction = (params: {
 
 export type Brush = {
   name: string;
-  defaultState: BrushState;
+  state: BrushStateProperty[];
   action: BrushAction;
 };
 

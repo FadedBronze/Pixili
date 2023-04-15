@@ -86,9 +86,7 @@ export default function PixelCanvas(props: {
       y: Math.abs(Math.floor(mousePos.y / pixelSize)),
     };
 
-    const brush = brushes().find(
-      ({ name }) => name === props.brushState?.brushName
-    );
+    const brush = brushes().find(({ name }) => name === props.brushState?.name);
 
     brush?.action({
       ctx,

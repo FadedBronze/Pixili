@@ -3,19 +3,16 @@ import { Brush, getStateAs } from "./brush";
 
 export const pixel: Brush = {
   name: "pixel",
-  defaultState: {
-    brushName: "pixel",
-    state: [
-      {
-        name: "pixel perfect",
-        value: false,
-      },
-      {
-        name: "scale",
-        value: 1,
-      },
-    ],
-  },
+  state: [
+    {
+      name: "pixel perfect",
+      value: false,
+    },
+    {
+      name: "scale",
+      value: 1,
+    },
+  ],
   action: ({
     ctx,
     pixelCanvasDimensions,

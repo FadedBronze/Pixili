@@ -3,10 +3,7 @@ import { Brush } from "./brush";
 
 export const select: Brush = {
   name: "select",
-  defaultState: {
-    brushName: "select",
-    state: [],
-  },
+  state: [],
   action: ({
     ctx,
     pixelCanvasDimensions,

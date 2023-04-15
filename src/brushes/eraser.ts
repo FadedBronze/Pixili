@@ -3,15 +3,12 @@ import { Brush, getStateAs } from "./brush";
 
 export const eraser: Brush = {
   name: "eraser",
-  defaultState: {
-    brushName: "eraser",
-    state: [
-      {
-        name: "scale",
-        value: 1,
-      },
-    ],
-  },
+  state: [
+    {
+      name: "scale",
+      value: 1,
+    },
+  ],
   action: ({
     ctx,
     pixelCanvasDimensions,
